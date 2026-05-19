@@ -18,4 +18,24 @@ class AdminController extends Controller
 
         return view('admin.index', compact('totalOrders', 'totalProducts', 'totalUsers', 'pendingOrders'));
     }
+
+    public function reviews()
+{
+    $reviews = \App\Models\Review::with(['user', 'product'])->orderBy('id', 'desc')->paginate(20);
+    return view('admin.reviews', compact('reviews'));
+}
+
+public function approveReview($id)
+{
+    $review = \App\Models\Review::findOrFail($id);
+    $review->update(['status' => 'approved']);
+    return back()->with('success', 'Отзыв одобрен');
+}
+
+public function rejectReview($id)
+{
+    $review = \App\Models\Review::findOrFail($id);
+    $review->update(['status' => 'rejected']);
+    return back()->with('success', 'Отзыв отклонен');
+}
 }

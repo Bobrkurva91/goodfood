@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">Каталог товаров</h1>
-    
+
     <div class="flex flex-col md:flex-row gap-8">
         <!-- Фильтры -->
         <div class="md:w-1/4">
@@ -19,7 +19,7 @@
                     </li>
                     @foreach($categories as $category)
                     <li>
-                        <a href="{{ route('catalog', ['category' => $category->id, 'sort' => $sort]) }}" 
+                        <a href="{{ route('catalog', ['category' => $category->id, 'sort' => $sort]) }}"
                            class="text-gray-600 hover:text-red-600 transition {{ request('category') == $category->id ? 'text-red-600 font-semibold' : '' }}">
                             {{ $category->name }}
                         </a>
@@ -28,7 +28,7 @@
                 </ul>
             </div>
         </div>
-        
+
         <!-- Товары -->
         <div class="md:w-3/4">
             <!-- Сортировка -->
@@ -46,24 +46,45 @@
                     </option>
                 </select>
             </div>
-            
+
             <!-- Сетка товаров -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($products as $product)
-                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover group">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover group relative">
                     <div class="h-48 bg-gray-200 flex items-center justify-center relative">
                         @if($product->image)
-                            <img src="{{ $product->image }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                         @else
                             <i class="fas fa-image text-4xl text-gray-400"></i>
                         @endif
+
+                        <!-- Кнопка "В избранное" -->
+                        @auth
+                            @if(Auth::user()->isInWishlist($product->id))
+                                <form method="POST" action="{{ route('wishlist.remove', $product) }}" class="absolute top-2 left-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="bg-white rounded-full p-2 shadow-md hover:bg-red-50">
+                                        <i class="fas fa-heart text-red-600"></i>
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('wishlist.add', $product) }}" class="absolute top-2 left-2">
+                                    @csrf
+                                    <button type="submit" class="bg-white rounded-full p-2 shadow-md hover:bg-red-50">
+                                        <i class="far fa-heart text-gray-600 hover:text-red-600"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        @endauth
+
                         @if($product->is_on_sale)
                             <span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
                                 Акция
                             </span>
                         @endif
                         @if($product->is_new)
-                            <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
+                            <span class="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
                                 Новинка
                             </span>
                         @endif
@@ -85,7 +106,7 @@
                 </div>
                 @endforelse
             </div>
-            
+
             <!-- Пагинация -->
             <div class="mt-8">
                 {{ $products->appends(request()->query())->links() }}

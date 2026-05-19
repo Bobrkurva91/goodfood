@@ -65,7 +65,7 @@
     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">🔥 Новинки</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($newProducts as $product)
-        <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover group">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover group relative">
             <div class="h-48 bg-gray-200 flex items-center justify-center relative overflow-hidden">
                 @if($product->image && file_exists(public_path($product->image)))
                     <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -75,6 +75,27 @@
                         <span class="text-xs text-gray-500">{{ $product->name }}</span>
                     </div>
                 @endif
+
+                <!-- Кнопка "В избранное" -->
+                @auth
+                    @if(Auth::user()->isInWishlist($product->id))
+                        <form method="POST" action="{{ route('wishlist.remove', $product) }}" class="absolute top-2 left-2">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="bg-white rounded-full p-2 shadow-md hover:bg-red-50">
+                                <i class="fas fa-heart text-red-600"></i>
+                            </button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('wishlist.add', $product) }}" class="absolute top-2 left-2">
+                            @csrf
+                            <button type="submit" class="bg-white rounded-full p-2 shadow-md hover:bg-red-50">
+                                <i class="far fa-heart text-gray-600 hover:text-red-600"></i>
+                            </button>
+                        </form>
+                    @endif
+                @endauth
+
                 <span class="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
                     Новинка
                 </span>

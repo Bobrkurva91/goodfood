@@ -128,6 +128,18 @@
                 Управление →
             </a>
         </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border border-gray-100">
+    <div class="flex items-center mb-4">
+        <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-star text-pink-600 text-xl"></i>
+        </div>
+        <h2 class="text-xl font-bold ml-3">Отзывы</h2>
+    </div>
+    <p class="text-gray-600 mb-4 text-sm">Модерация отзывов пользователей о товарах</p>
+    <a href="{{ route('admin.reviews') }}" class="text-red-600 hover:underline inline-flex items-center text-sm font-medium">
+        Управление →
+    </a>
+</div>
     </div>
 </div>
 @endsection

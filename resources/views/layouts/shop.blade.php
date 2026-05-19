@@ -22,45 +22,55 @@
                             <a href="/catalog" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">Каталог</a>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center space-x-4">
                         @auth
-                            <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-red-600 relative">
-    <i class="fas fa-shopping-cart text-xl"></i>
-    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-        0
+                            <!-- Иконка избранного со счетчиком -->
+<a href="{{ route('wishlist.index') }}" class="text-gray-700 hover:text-red-600 relative">
+    <i class="fas fa-heart text-xl"></i>
+    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style="display: {{ Auth::user()->wishlistCount() > 0 ? 'flex' : 'none' }}">
+        {{ Auth::user()->wishlistCount() }}
     </span>
 </a>
+
+                            <!-- Иконка корзины -->
+                            <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-red-600 relative">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                                <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    0
+                                </span>
+                            </a>
+
                             <div class="relative" x-data="{ open: false }">
-    <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-red-600 focus:outline-none">
-        <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-            {{ substr(Auth::user()->name, 0, 1) }}
-        </div>
-        <span class="font-medium">{{ Auth::user()->name }}</span>
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-    </button>
-    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100" style="display: none;">
-        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
-            <i class="fas fa-user mr-2"></i> Мой профиль
-        </a>
-        
-        @if(Auth::user()->isAdmin())
-    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
-        <i class="fas fa-chart-line mr-2"></i> Админ-панель
-    </a>
-@endif
-        
-        <div class="border-t my-1"></div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
-                <i class="fas fa-sign-out-alt mr-2"></i> Выйти
-            </button>
-        </form>
-    </div>
-</div>
+                                <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-red-600 focus:outline-none">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                    </div>
+                                    <span class="font-medium">{{ Auth::user()->name }}</span>
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100" style="display: none;">
+                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
+                                        <i class="fas fa-user mr-2"></i> Мой профиль
+                                    </a>
+
+                                    @if(Auth::user()->isAdmin())
+                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
+                                            <i class="fas fa-chart-line mr-2"></i> Админ-панель
+                                        </a>
+                                    @endif
+
+                                    <div class="border-t my-1"></div>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
+                                            <i class="fas fa-sign-out-alt mr-2"></i> Выйти
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         @else
                             <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">Вход</a>
                             <a href="{{ route('register') }}" class="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-md text-sm font-medium">Регистрация</a>
@@ -85,25 +95,40 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-    function updateCartCount() {
-        fetch('{{ route("cart.count") }}')
+        function updateCartCount() {
+            fetch('{{ route("cart.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const countSpan = document.getElementById('cart-count');
+                    if (countSpan) {
+                        countSpan.textContent = data.count;
+                        countSpan.style.display = data.count > 0 ? 'flex' : 'none';
+                    }
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateCartCount);
+    </script>
+    <script>
+    function updateWishlistCount() {
+        fetch('{{ route("wishlist.count") }}')
             .then(response => response.json())
             .then(data => {
-                const countSpan = document.getElementById('cart-count');
+                const countSpan = document.getElementById('wishlist-count');
                 if (countSpan) {
                     countSpan.textContent = data.count;
                     countSpan.style.display = data.count > 0 ? 'flex' : 'none';
                 }
             });
     }
-    
-    // Обновляем при загрузке страницы
-    document.addEventListener('DOMContentLoaded', updateCartCount);
-    
-    // Обновляем после добавления товара (если форма отправляется)
-    document.querySelectorAll('form[action*="/cart/add/"]').forEach(form => {
+
+    // Обновляем при загрузке страницы и после действий с избранным
+    document.addEventListener('DOMContentLoaded', updateWishlistCount);
+
+    // Перехватываем отправку форм избранного
+    document.querySelectorAll('form[action*="/wishlist/"]').forEach(form => {
         form.addEventListener('submit', function() {
-            setTimeout(updateCartCount, 500);
+            setTimeout(updateWishlistCount, 300);
         });
     });
 </script>

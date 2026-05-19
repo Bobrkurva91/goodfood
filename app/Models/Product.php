@@ -28,19 +28,38 @@ class Product extends Model
         'is_on_sale' => 'boolean',
     ];
 
-    /**
-     * Связь: товар принадлежит категории
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Связь: товар может быть во многих позициях заказа
-     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->where('status', 'approved');
+    }
+
+    public function allReviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function averageRating(): float
+    {
+        return round($this->reviews()->avg('rating'), 1);
+    }
+
+    public function reviewsCount(): int
+    {
+        return $this->reviews()->count();
     }
 }

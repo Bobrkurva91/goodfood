@@ -44,6 +44,18 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
+// Избранное (только для авторизованных)
+Route::middleware(['auth'])->prefix('wishlist')->group(function () {
+    Route::get('/', [App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/add/{product}', [App\Http\Controllers\WishlistController::class, 'add'])->name('wishlist.add');
+    Route::delete('/remove/{product}', [App\Http\Controllers\WishlistController::class, 'remove'])->name('wishlist.remove');
+    Route::get('/wishlist/count', [App\Http\Controllers\WishlistController::class, 'count'])->name('wishlist.count');
+});
+
+
+// Отзывы (только для авторизованных)
+Route::post('/product/{product}/review', [App\Http\Controllers\ReviewController::class, 'store'])->name('review.store')->middleware('auth');
+
 // ==================== АДМИН-ПАНЕЛЬ (ТОЛЬКО ДЛЯ АДМИНОВ) ====================
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Главная админки
@@ -98,7 +110,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::get('/products', [App\Http\Controllers\Admin\ReportController::class, 'products'])->name('admin.reports.products');
         Route::get('/export', [App\Http\Controllers\Admin\ReportController::class, 'export'])->name('admin.reports.export');
     });
+    // Отзывы
+    Route::get('/reviews', [App\Http\Controllers\Admin\AdminController::class, 'reviews'])->name('admin.reviews');
+Route::post('/reviews/{id}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveReview'])->name('admin.reviews.approve');
+Route::post('/reviews/{id}/reject', [App\Http\Controllers\Admin\AdminController::class, 'rejectReview'])->name('admin.reviews.reject');
+
+
 });
+
+
 
 // ==================== КАСТОМНЫЙ ЛОГИН ====================
 Route::post('/login', [CustomLoginController::class, 'login'])->name('login');

@@ -17,13 +17,13 @@ class CustomLoginController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
-            // Если админ — на админ-панель, если обычный пользователь — на главную
+
+            // Если админ → на админ-панель, иначе → на главную
             if (Auth::user()->isAdmin()) {
-                return redirect()->intended('/admin');
+                return redirect()->route('admin.dashboard');
             }
-            
-            return redirect()->intended('/');
+
+            return redirect('/');
         }
 
         return back()->withErrors([
