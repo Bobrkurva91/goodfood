@@ -61,26 +61,10 @@
                 <h3>🚚 Данные доставки</h3>
                 <p><strong>Получатель:</strong> {{ $order->customer_name }}</p>
                 <p><strong>Телефон:</strong> {{ $order->customer_phone }}</p>
-                <p><strong>Адрес:</strong> {{ $order->delivery_address }}</p>
+                <p><strong>Адрес:</strong> {{ $order->delivery_address ?? 'Самовывоз из кафе' }}</p>
                 @if($order->delivery_notes)
                     <p><strong>Комментарий:</strong> {{ $order->delivery_notes }}</p>
                 @endif
-            </div>
-
-            <div class="order-details">
-                <h3>📊 Статус заказа</h3>
-                <p><strong>Текущий статус:</strong>
-                    @switch($order->status)
-                        @case('pending') ⏳ Ожидает обработки @break
-                        @case('processing') 🔄 В обработке @break
-                        @case('completed') ✅ Выполнен @break
-                        @case('cancelled') ❌ Отменен @break
-                        @default {{ $order->status }}
-                    @endswitch
-                </p>
-                <p><strong>Статус оплаты:</strong>
-                    {{ $order->payment_status === 'paid' ? '✅ Оплачен' : '⏳ Ожидает оплаты' }}
-                </p>
             </div>
 
             <p>Мы свяжемся с вами для уточнения деталей доставки.</p>

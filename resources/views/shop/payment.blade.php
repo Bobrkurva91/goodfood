@@ -1,121 +1,133 @@
 @extends('layouts.shop')
 
-@section('title', 'Оплата заказа')
+@section('title', 'Заказ #' . $order->order_number)
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Успешное сообщение -->
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-            {{ session('success') }}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 text-center">
+            ✅ {{ session('success') }}
         </div>
     @endif
 
-    <!-- Чек об оплате -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <!-- Заголовок чека -->
-        <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
-            <div class="text-center text-white">
-                <i class="fas fa-check-circle text-4xl mb-2"></i>
-                <h1 class="text-2xl font-bold">Заказ успешно оформлен!</h1>
-                <p class="text-green-100">Номер заказа: {{ $order->order_number }}</p>
+    @if(session('info'))
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg mb-6 text-center">
+            ℹ️ {{ session('info') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-center">
+            ❌ {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Чек -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+
+        <!-- Шапка чека -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-5 text-center text-white">
+            <div class="flex justify-between items-center">
+                <div class="text-left">
+                    <p class="text-xs opacity-80">ЗАКАЗ №</p>
+                    <p class="text-xl font-bold tracking-wider">{{ $order->order_number }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs opacity-80">СТАТУС</p>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                        @if($order->status == 'completed') bg-green-500 text-white
+                        @elseif($order->status == 'processing') bg-blue-500 text-white
+                        @elseif($order->status == 'cancelled') bg-red-500 text-white
+                        @else bg-yellow-500 text-white @endif">
+                        @if($order->status == 'pending') Ожидает
+                        @elseif($order->status == 'processing') В обработке
+                        @elseif($order->status == 'completed') Выполнен
+                        @elseif($order->status == 'cancelled') Отменен
+                        @else {{ $order->status }}
+                        @endif
+                    </span>
+                </div>
             </div>
         </div>
 
         <!-- Тело чека -->
         <div class="p-6">
-            <!-- Информация о заказе -->
-            <div class="border-b pb-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-3">Детали заказа</h2>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <p class="text-gray-500">Дата заказа:</p>
-                    <p class="text-gray-800">{{ $order->created_at->format('d.m.Y H:i') }}</p>
+            <!-- Сумма -->
+            <div class="text-center mb-6">
+                <p class="text-gray-500 text-sm">Итого к оплате</p>
+                <p class="text-4xl font-black text-red-600">{{ number_format($order->total_amount, 0, ',', ' ') }} ₽</p>
+                <p class="text-gray-400 text-xs mt-1">Оплата:
+                    @if($order->payment_type == 'online')
+                        <span class="text-green-600">✅ Оплачено онлайн</span>
+                    @else
+                        <span class="text-yellow-600">🔄 При получении</span>
+                    @endif
+                </p>
+            </div>
 
-                    <p class="text-gray-500">Статус:</p>
-                    <p>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Ожидает подтверждения
-                        </span>
-                    </p>
-
-                    <p class="text-gray-500">Способ оплаты:</p>
-                    <p class="text-gray-800">При получении (наличные/карта)</p>
+            <!-- Состав заказа -->
+            <div class="border-t border-gray-100 pt-4 mb-4">
+                <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-2">Состав заказа</p>
+                @foreach($order->items as $item)
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ $item->product_name }}</p>
+                        <p class="text-gray-400 text-sm">{{ number_format($item->product_price, 0, ',', ' ') }} ₽ × {{ $item->quantity }}</p>
+                    </div>
+                    <p class="font-semibold text-gray-800">{{ number_format($item->total, 0, ',', ' ') }} ₽</p>
                 </div>
+                @endforeach
             </div>
 
             <!-- Данные получателя -->
-            <div class="border-b pb-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-3">Данные получателя</h2>
+            <div class="border-t border-gray-100 pt-4 mb-4">
                 <div class="grid grid-cols-2 gap-2 text-sm">
-                    <p class="text-gray-500">Получатель:</p>
-                    <p class="text-gray-800">{{ $order->customer_name }}</p>
-
-                    <p class="text-gray-500">Телефон:</p>
-                    <p class="text-gray-800">{{ $order->customer_phone }}</p>
-
-                    <p class="text-gray-500">Email:</p>
-                    <p class="text-gray-800">{{ $order->customer_email }}</p>
-
-                    <p class="text-gray-500">Адрес доставки:</p>
-                    <p class="text-gray-800">{{ $order->delivery_address }}</p>
-
-                    @if($order->delivery_notes)
-                        <p class="text-gray-500">Комментарий:</p>
-                        <p class="text-gray-800">{{ $order->delivery_notes }}</p>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Получатель</p>
+                        <p class="font-medium">{{ $order->customer_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Телефон</p>
+                        <p class="font-medium">{{ $order->customer_phone }}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Способ получения</p>
+                    <p class="font-medium">
+                        @if($order->delivery_type == 'delivery')
+                            🚚 Доставка курьером
+                        @else
+                            🏠 Самовывоз из кафе
+                        @endif
+                    </p>
+                    @if($order->delivery_type == 'delivery' && $order->delivery_address)
+                        <p class="text-sm text-gray-500 mt-1">📍 {{ $order->delivery_address }}</p>
                     @endif
                 </div>
             </div>
 
-            <!-- Состав заказа -->
-            <div class="border-b pb-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-3">🛒 Состав заказа</h2>
-                <div class="space-y-3">
-                    @foreach($order->items as $item)
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-800">{{ $item->product_name }}</p>
-                            <p class="text-sm text-gray-500">{{ number_format($item->product_price, 0, ',', ' ') }} ₽ × {{ $item->quantity }}</p>
-                        </div>
-                        <p class="font-semibold text-gray-800 ml-4">{{ number_format($item->total, 0, ',', ' ') }} ₽</p>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Итого -->
-            <div class="flex justify-between items-center mb-6">
-                <span class="text-lg font-bold text-gray-800">Итого к оплате:</span>
-                <span class="text-2xl font-bold text-red-600">{{ number_format($order->total_amount, 0, ',', ' ') }} ₽</span>
-            </div>
-
-            <!-- Информация о подтверждении -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-start">
-                    <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
-                    <div class="text-sm text-blue-700">
-                        <p class="font-semibold mb-1">Как будет происходить оплата?</p>
-                        <p>Это демонстрационная версия магазина. Наш менеджер свяжется с вами в ближайшее время для подтверждения заказа.</p>
-                        <p class="mt-1">Оплата производится при получении заказа.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Кнопки действий -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('catalog') }}" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition text-center">
-                    Продолжить покупки
-                </a>
-                <button onclick="window.print()" class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition">
-                    <i class="fas fa-print mr-2"></i> Распечатать чек
-                </button>
+            <!-- Дата -->
+            <div class="border-t border-gray-100 pt-4 text-center text-gray-400 text-sm">
+                <p>Заказ оформлен: {{ $order->created_at->format('d.m.Y H:i') }}</p>
+                <p class="text-xs mt-1">Спасибо, что выбрали GooDFooD! 🍔</p>
             </div>
         </div>
-    </div>
 
-    <!-- Номер заказа для отслеживания -->
-    <div class="text-center mt-6 text-gray-500 text-sm">
-        <p>Сохраните номер заказа: <strong class="text-gray-700">{{ $order->order_number }}</strong></p>
-        <p>Вы можете отслеживать статус заказа в личном кабинете</p>
+        <!-- Кнопки -->
+        <div class="bg-gray-50 px-6 py-4 flex flex-wrap justify-center gap-3">
+            <a href="{{ route('catalog') }}" class="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition">
+                🍽️ Продолжить покупки
+            </a>
+            <button onclick="window.print()" class="border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium px-6 py-2.5 rounded-xl text-sm transition">
+                🖨️ Распечатать чек
+            </button>
+            @if($order->delivery_type == 'pickup' && $order->payment_type != 'online')
+                <a href="#" class="border border-green-300 hover:bg-green-50 text-green-700 font-medium px-6 py-2.5 rounded-xl text-sm transition">
+                    📍 Забрать в кафе
+                </a>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

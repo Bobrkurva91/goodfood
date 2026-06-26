@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\Courier;
+
 
 class OrderController extends Controller
 {
@@ -114,6 +116,42 @@ class OrderController extends Controller
             ->with('success', 'Товар "' . $productName . '" удален из заказа');
     }
 
+    /**
+ * Назначить курьера на заказ (вручную)
+ */
+public function assignCourier(Request $request, Order $order)
+{
+    $request->validate([
+        'courier_id' => 'required|exists:couriers,id',
+    ]);
+
+    $courier = Courier::findOrFail($request->courier_id);
+
+    $order->update([
+        'courier_id' => $courier->id,
+        'delivery_status' => 'assigned_to_courier',
+        'courier_assigned_at' => now(),
+    ]);
+
+    return back()->with('success', 'Курьер ' . $courier->name . ' назначен на заказ #' . $order->order_number);
+}
+
+/**
+ * Обновить статус доставки вручную
+ */
+public function updateDeliveryStatus(Request $request, Order $order)
+{
+    $request->validate([
+        'delivery_status' => 'required|in:pending,assigned_to_courier,courier_took,on_the_way,delivered',
+    ]);
+
+    $order->update([
+        'delivery_status' => $request->delivery_status,
+        'delivered_at' => $request->delivery_status === 'delivered' ? now() : null,
+    ]);
+
+    return back()->with('success', 'Статус доставки обновлен');
+}
     /**
      * Удаление заказа
      */

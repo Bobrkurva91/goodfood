@@ -32,6 +32,68 @@
     </div>
 </section>
 
+{{-- <!-- Блок последних отзывов о сайте -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">💬 Что говорят о нас</h2>
+        <a href="{{ route('feedback.index') }}" class="text-red-600 hover:underline text-sm font-medium">
+            Все отзывы →
+        </a>
+    </div>
+
+    @php
+        $latestFeedbacks = \App\Models\SiteFeedback::where('status', 'published')
+            ->orderBy('id', 'desc')
+            ->limit(3)
+            ->get();
+    @endphp
+
+    @if($latestFeedbacks->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            @foreach($latestFeedbacks as $feedback)
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
+                        {{ substr($feedback->name, 0, 1) }}
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-semibold text-gray-800">{{ $feedback->name }}</p>
+                        <div class="flex items-center">
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $feedback->rating)
+                                    <i class="fas fa-star text-yellow-500 text-sm"></i>
+                                @else
+                                    <i class="far fa-star text-gray-300 text-sm"></i>
+                                @endif
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm line-clamp-3">{{ Str::limit($feedback->message, 100) }}</p>
+                <p class="text-gray-400 text-xs mt-2">
+                    {{ $feedback->created_at->format('d.m.Y') }}
+                    <span class="ml-2 inline-block px-2 py-0.5 rounded-full text-xs
+                        @if($feedback->type == 'delivery') bg-blue-100 text-blue-700
+                        @elseif($feedback->type == 'quality') bg-green-100 text-green-700
+                        @elseif($feedback->type == 'service') bg-purple-100 text-purple-700
+                        @elseif($feedback->type == 'website') bg-orange-100 text-orange-700
+                        @else bg-gray-100 text-gray-700 @endif">
+                        {{ ucfirst($feedback->type) }}
+                    </span>
+                </p>
+            </div>
+            @endforeach
+        </div>
+    @else
+        <div class="bg-white rounded-xl shadow-md p-8 text-center">
+            <p class="text-gray-500">Пока нет отзывов. Будьте первым!</p>
+            <a href="{{ route('feedback.index') }}" class="text-red-600 hover:underline text-sm mt-2 inline-block">
+                Оставить отзыв →
+            </a>
+        </div>
+    @endif
+</section> --}}
+
 <!-- Преимущества -->
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

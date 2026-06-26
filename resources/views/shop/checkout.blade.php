@@ -12,8 +12,14 @@
         </div>
     @endif
 
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Форма оформления заказа -->
+        <!-- Форма -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4">Контактные данные</h2>
@@ -47,14 +53,34 @@
                         <p class="text-gray-500 text-sm mt-1">Письмо с подтверждением придет на этот адрес</p>
                     </div>
 
+                    <!-- Способ получения (выпадающий список) -->
                     <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2">Способ получения *</label>
+                        <select name="delivery_type" id="delivery_type" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="pickup">🏠 Самовывоз (из кафе)</option>
+                            <option value="delivery">🚚 Доставка</option>
+                        </select>
+                    </div>
+
+                    <!-- Адрес доставки (показывается только при доставке) -->
+                    <div class="mb-4" id="address-block" style="display: none;">
                         <label class="block text-gray-700 font-medium mb-2">Адрес доставки *</label>
                         <textarea name="delivery_address" rows="3"
                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                  required>{{ old('delivery_address') }}</textarea>
+                                  placeholder="Введите адрес доставки">{{ old('delivery_address') }}</textarea>
                         @error('delivery_address')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <!-- Способ оплаты (выпадающий список) -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2">Способ оплаты *</label>
+                        <select name="payment_type" id="payment_type" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="online">💳 Оплата картой на сайте</option>
+                            <option value="cash" id="cash-option">💰 Оплата при получении</option>
+                        </select>
+                        <p class="text-gray-500 text-sm mt-1" id="payment-hint">Для доставки доступна только оплата картой на сайте</p>
                     </div>
 
                     <div class="mb-4">
@@ -67,38 +93,71 @@
         </div>
 
         <!-- Информация о заказе -->
-<div class="lg:col-span-1">
-    <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
-        <h2 class="text-xl font-bold mb-4">🛒 Ваш заказ</h2>
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-bold mb-4">🛒 Ваш заказ</h2>
 
-        <div class="border-b pb-3 mb-3 max-h-96 overflow-y-auto">
-            @foreach($items as $item)
-            <div class="flex justify-between mb-3 pb-3 border-b border-gray-100">
-                <div class="flex-1">
-                    <p class="font-medium text-gray-800">{{ $item->product->name }}</p>
-                    <p class="text-gray-500 text-sm">
-                        {{ number_format($item->price, 0, ',', ' ') }} ₽ × {{ $item->quantity }}
-                    </p>
+                <div class="border-b pb-3 mb-3 max-h-96 overflow-y-auto">
+                    @foreach($items as $item)
+                    <div class="flex justify-between mb-3 pb-3 border-b border-gray-100">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">{{ $item->product->name }}</p>
+                            <p class="text-gray-500 text-sm">
+                                {{ number_format($item->price, 0, ',', ' ') }} ₽ × {{ $item->quantity }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-semibold text-gray-800">{{ number_format($item->quantity * $item->price, 0, ',', ' ') }} ₽</span>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
-                <div class="text-right">
-                    <span class="font-semibold text-gray-800">{{ number_format($item->quantity * $item->price, 0, ',', ' ') }} ₽</span>
+
+                <div class="flex justify-between mb-4 pt-2">
+                    <span class="font-bold text-lg">Итого:</span>
+                    <span class="font-bold text-2xl text-red-600">{{ number_format($total, 0, ',', ' ') }} ₽</span>
                 </div>
+
+                <button type="submit" form="checkout-form" class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition">
+                    Подтвердить заказ
+                </button>
+
+                <p class="text-gray-500 text-sm text-center mt-4">
+                    Нажимая "Подтвердить заказ", вы соглашаетесь с условиями доставки
+                </p>
             </div>
-            @endforeach
         </div>
-
-        <div class="flex justify-between mb-4 pt-2">
-            <span class="font-bold text-lg">Итого:</span>
-            <span class="font-bold text-2xl text-red-600">{{ number_format($total, 0, ',', ' ') }} ₽</span>
-        </div>
-
-        <button type="submit" form="checkout-form" class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition">
-            Подтвердить заказ
-        </button>
-
-        <p class="text-gray-500 text-sm text-center mt-4">
-            Нажимая "Подтвердить заказ", вы соглашаетесь с условиями доставки
-        </p>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deliverySelect = document.getElementById('delivery_type');
+    const addressBlock = document.getElementById('address-block');
+    const paymentSelect = document.getElementById('payment_type');
+    const cashOption = document.getElementById('cash-option');
+    const paymentHint = document.getElementById('payment-hint');
+
+    function toggleFields() {
+        if (deliverySelect.value === 'delivery') {
+            addressBlock.style.display = 'block';
+            // При доставке только онлайн-оплата
+            cashOption.disabled = true;
+            cashOption.style.color = '#999';
+            if (paymentSelect.value === 'cash') {
+                paymentSelect.value = 'online';
+            }
+            paymentHint.textContent = 'Для доставки доступна только оплата картой на сайте';
+        } else {
+            addressBlock.style.display = 'none';
+            cashOption.disabled = false;
+            cashOption.style.color = '#000';
+            paymentHint.textContent = 'Для самовывоза доступна оплата при получении';
+        }
+    }
+
+    deliverySelect.addEventListener('change', toggleFields);
+    toggleFields();
+});
+</script>
 @endsection

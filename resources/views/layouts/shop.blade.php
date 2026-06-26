@@ -20,18 +20,19 @@
                         <div class="hidden md:flex ml-10 space-x-4">
                             <a href="/" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">Главная</a>
                             <a href="/catalog" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">Каталог</a>
+                            {{-- <a href="/feedback" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">💬 Отзывы</a> --}}
                         </div>
                     </div>
 
                     <div class="flex items-center space-x-4">
                         @auth
-                            <!-- Иконка избранного со счетчиком -->
-<a href="{{ route('wishlist.index') }}" class="text-gray-700 hover:text-red-600 relative">
-    <i class="fas fa-heart text-xl"></i>
-    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style="display: {{ Auth::user()->wishlistCount() > 0 ? 'flex' : 'none' }}">
-        {{ Auth::user()->wishlistCount() }}
-    </span>
-</a>
+                            <!-- Иконка избранного -->
+                            <a href="{{ route('wishlist.index') }}" class="text-gray-700 hover:text-red-600 relative">
+                                <i class="fas fa-heart text-xl"></i>
+                                <span id="wishlist-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style="display: {{ Auth::user()->wishlistCount() > 0 ? 'flex' : 'none' }}">
+                                    {{ Auth::user()->wishlistCount() }}
+                                </span>
+                            </a>
 
                             <!-- Иконка корзины -->
                             <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-red-600 relative">
@@ -89,12 +90,15 @@
         <footer class="bg-white shadow-lg mt-auto py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
                 <p>© 2026 GooDFooD - Вкусная еда с доставкой</p>
+                <p class="text-sm mt-1">📍 Гатчина | 🚚 Доставка по городу</p>
             </div>
         </footer>
     </div>
 
+    <!-- Скрипты -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
+        // ============ СЧЁТЧИК КОРЗИНЫ ============
         function updateCartCount() {
             fetch('{{ route("cart.count") }}')
                 .then(response => response.json())
@@ -106,31 +110,28 @@
                     }
                 });
         }
-
         document.addEventListener('DOMContentLoaded', updateCartCount);
-    </script>
-    <script>
-    function updateWishlistCount() {
-        fetch('{{ route("wishlist.count") }}')
-            .then(response => response.json())
-            .then(data => {
-                const countSpan = document.getElementById('wishlist-count');
-                if (countSpan) {
-                    countSpan.textContent = data.count;
-                    countSpan.style.display = data.count > 0 ? 'flex' : 'none';
-                }
+
+        // ============ СЧЁТЧИК ИЗБРАННОГО ============
+        function updateWishlistCount() {
+            fetch('{{ route("wishlist.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const countSpan = document.getElementById('wishlist-count');
+                    if (countSpan) {
+                        countSpan.textContent = data.count;
+                        countSpan.style.display = data.count > 0 ? 'flex' : 'none';
+                    }
+                });
+        }
+        document.addEventListener('DOMContentLoaded', updateWishlistCount);
+
+        // Обновление после действий с избранным
+        document.querySelectorAll('form[action*="/wishlist/"]').forEach(form => {
+            form.addEventListener('submit', function() {
+                setTimeout(updateWishlistCount, 300);
             });
-    }
-
-    // Обновляем при загрузке страницы и после действий с избранным
-    document.addEventListener('DOMContentLoaded', updateWishlistCount);
-
-    // Перехватываем отправку форм избранного
-    document.querySelectorAll('form[action*="/wishlist/"]').forEach(form => {
-        form.addEventListener('submit', function() {
-            setTimeout(updateWishlistCount, 300);
         });
-    });
-</script>
+    </script>
 </body>
 </html>
